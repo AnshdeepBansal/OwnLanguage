@@ -1,8 +1,8 @@
-import components
+from components import run
 
 while True:
-    text = input('basic > ')
-    result, error = components.run('<stdin>', text)
+    text = input('>> ')
+    result, error = run('<stdin>', text)
 
     if error: print(error.as_string())
     else: print(result)

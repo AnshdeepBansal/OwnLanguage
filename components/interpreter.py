@@ -1,7 +1,8 @@
 from .number import *
 from .RunTimeResult import *
 from .constants import *
-from .values import *
+from .values import List,Number,String,Function
+
 
 class Interpreter:
   def visit(self, node, context):

@@ -6,6 +6,7 @@ from .context import Context
 from .symbolTable import *
 from .number import *
 from .values import *
+from .RunTimeResult import *
 
 global_symbol_table = SymbolTable()
 global_symbol_table.set("NULL", Number.null)

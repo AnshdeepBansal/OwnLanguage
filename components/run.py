@@ -6,7 +6,7 @@ from .context import Context
 from .symbolTable import *
 from .number import *
 from .values import *
-from .RunTimeResult import *
+
 
 global_symbol_table = SymbolTable()
 global_symbol_table.set("NULL", Number.null)
@@ -38,6 +38,7 @@ def run(fn, text):
   parser = Parser(tokens)
   ast = parser.parse()
   if ast.error: return None, ast.error
+
 
   # Run program
   interpreter = Interpreter()

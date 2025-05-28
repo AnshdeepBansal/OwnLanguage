@@ -1,11 +1,11 @@
-from components import run
+from components.helper import basic
 
 try:
     while True:
         text = input('basic > ')
         if text.strip() == "":
             continue
-        result, error = run('<stdin>', text)
+        result, error = basic.run('<stdin>', text)
 
         if error:
             print(error.as_string())

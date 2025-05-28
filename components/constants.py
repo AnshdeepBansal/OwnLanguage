@@ -40,7 +40,10 @@ KEYWORDS = [
   'WHILE',
   'FUN',
   'THEN',
-  'END'
+  'END',
+  'RETURN',
+  'CONTINUE',
+  'BREAK'
 ]
 
 

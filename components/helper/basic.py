@@ -372,7 +372,7 @@ class NumberNode:
     self.pos_end = self.tok.pos_end
 
   def __repr__(self):
-    return f'{self.tok}'
+    return f'NumberNode({self.tok.value})'
 
 class StringNode:
   def __init__(self, tok):
@@ -382,7 +382,7 @@ class StringNode:
     self.pos_end = self.tok.pos_end
 
   def __repr__(self):
-    return f'{self.tok}'
+    return f'StringNode("{self.tok.value}")'
 
 class ListNode:
   def __init__(self, element_nodes, pos_start, pos_end):
@@ -391,12 +391,19 @@ class ListNode:
     self.pos_start = pos_start
     self.pos_end = pos_end
 
+  def __repr__(self):
+    elements_str = ', '.join([repr(node) for node in self.element_nodes])
+    return f'ListNode([{elements_str}])'
+
 class VarAccessNode:
   def __init__(self, var_name_tok):
     self.var_name_tok = var_name_tok
 
     self.pos_start = self.var_name_tok.pos_start
     self.pos_end = self.var_name_tok.pos_end
+
+  def __repr__(self):
+    return f'VarAccessNode({self.var_name_tok.value})'
 
 class VarAssignNode:
   def __init__(self, var_name_tok, value_node):
@@ -405,6 +412,9 @@ class VarAssignNode:
 
     self.pos_start = self.var_name_tok.pos_start
     self.pos_end = self.value_node.pos_end
+
+  def __repr__(self):
+    return f'VarAssignNode({self.var_name_tok.value} = {repr(self.value_node)})'
 
 class BinOpNode:
   def __init__(self, left_node, op_tok, right_node):
@@ -416,7 +426,7 @@ class BinOpNode:
     self.pos_end = self.right_node.pos_end
 
   def __repr__(self):
-    return f'({self.left_node}, {self.op_tok}, {self.right_node})'
+    return f'BinOpNode({repr(self.left_node)} {self.op_tok.type} {repr(self.right_node)})'
 
 class UnaryOpNode:
   def __init__(self, op_tok, node):
@@ -427,7 +437,7 @@ class UnaryOpNode:
     self.pos_end = node.pos_end
 
   def __repr__(self):
-    return f'({self.op_tok}, {self.node})'
+    return f'UnaryOpNode({self.op_tok.type} {repr(self.node)})'
 
 class IfNode:
   def __init__(self, cases, else_case):
@@ -436,6 +446,9 @@ class IfNode:
 
     self.pos_start = self.cases[0][0].pos_start
     self.pos_end = (self.else_case or self.cases[len(self.cases) - 1])[0].pos_end
+
+  def __repr__(self):
+    return f'IfNode(cases={len(self.cases)}, else_case={self.else_case is not None})'
 
 class ForNode:
   def __init__(self, var_name_tok, start_value_node, end_value_node, step_value_node, body_node, should_return_null):
@@ -449,6 +462,9 @@ class ForNode:
     self.pos_start = self.var_name_tok.pos_start
     self.pos_end = self.body_node.pos_end
 
+  def __repr__(self):
+    return f'ForNode({self.var_name_tok.value})'
+
 class WhileNode:
   def __init__(self, condition_node, body_node, should_return_null):
     self.condition_node = condition_node
@@ -457,6 +473,9 @@ class WhileNode:
 
     self.pos_start = self.condition_node.pos_start
     self.pos_end = self.body_node.pos_end
+
+  def __repr__(self):
+    return f'WhileNode(condition={repr(self.condition_node)})'
 
 class FuncDefNode:
   def __init__(self, var_name_tok, arg_name_toks, body_node, should_auto_return):
@@ -474,6 +493,10 @@ class FuncDefNode:
 
     self.pos_end = self.body_node.pos_end
 
+  def __repr__(self):
+    name = self.var_name_tok.value if self.var_name_tok else '<anonymous>'
+    return f'FuncDefNode({name})'
+
 class CallNode:
   def __init__(self, node_to_call, arg_nodes):
     self.node_to_call = node_to_call
@@ -486,6 +509,9 @@ class CallNode:
     else:
       self.pos_end = self.node_to_call.pos_end
 
+  def __repr__(self):
+    return f'CallNode({repr(self.node_to_call)}, args={len(self.arg_nodes)})'
+
 class ReturnNode:
   def __init__(self, node_to_return, pos_start, pos_end):
     self.node_to_return = node_to_return
@@ -493,15 +519,24 @@ class ReturnNode:
     self.pos_start = pos_start
     self.pos_end = pos_end
 
+  def __repr__(self):
+    return f'ReturnNode({repr(self.node_to_return)})'
+
 class ContinueNode:
   def __init__(self, pos_start, pos_end):
     self.pos_start = pos_start
     self.pos_end = pos_end
 
+  def __repr__(self):
+    return 'ContinueNode()'
+
 class BreakNode:
   def __init__(self, pos_start, pos_end):
     self.pos_start = pos_start
     self.pos_end = pos_end
+
+  def __repr__(self):
+    return 'BreakNode()'
 
 #######################################
 # PARSE RESULT
@@ -1841,7 +1876,7 @@ class BuiltInFunction(BaseFunction):
         exec_ctx
       ))
 
-    _, error = run(fn, script)
+    _, error = run_without_prints(fn, script)
     
     if error:
       return RTResult().failure(RTError(
@@ -2180,7 +2215,7 @@ global_symbol_table.set("EXTEND", BuiltInFunction.extend)
 global_symbol_table.set("LEN", BuiltInFunction.len)
 global_symbol_table.set("RUN", BuiltInFunction.run)
 
-def run(fn, text):
+def run_without_prints(fn, text):
   # Generate tokens
   lexer = Lexer(fn, text)
   tokens, error = lexer.make_tokens()
@@ -2198,3 +2233,129 @@ def run(fn, text):
   result = interpreter.visit(ast.node, context)
 
   return result.value, result.error
+
+def run(fn, text):
+    print('=' * 60)
+    print('🚀 STARTING INTERPRETATION PROCESS')
+    print('=' * 60)
+    print(f'📄 Source Code:\n{text}\n')
+
+    try:
+        # PHASE 1: LEXICAL ANALYSIS (TOKENIZATION)
+        print('🔍 PHASE 1: LEXICAL ANALYSIS (TOKENIZATION)')
+        print('-' * 50)
+        
+        lexer = Lexer(fn, text)
+        tokens, error = lexer.make_tokens()
+        
+        if error:
+            print('❌ LEXICAL ERROR:', error.as_string())
+            return None, error
+        
+        print('✅ Tokens generated successfully:')
+        for index, token in enumerate(tokens):
+            if token.type != TT_EOF:
+                print(f'  {str(index).rjust(2)}: {token}')
+        print(f'\n📊 Total tokens: {len(tokens) - 1} (excluding EOF)\n')
+
+        # PHASE 2: SYNTAX ANALYSIS (PARSING)
+        print('🌳 PHASE 2: SYNTAX ANALYSIS (PARSING)')
+        print('-' * 50)
+        
+        parser = Parser(tokens)
+        ast = parser.parse()
+        
+        if ast.error:
+            print('❌ SYNTAX ERROR:', ast.error.as_string())
+            return None, ast.error
+        
+        print('✅ Abstract Syntax Tree (AST) generated successfully:')
+        print(f'  Root: {ast.node}')
+        
+        # Pretty print AST structure
+        def print_ast_structure(node, indent=0):
+            spaces = '  ' * indent
+            node_name = type(node).__name__
+            print(f'{spaces}├─ {node_name}')
+            
+            if hasattr(node, 'left_node') and hasattr(node, 'right_node'):
+                print(f'{spaces}│  ├─ Left:')
+                print_ast_structure(node.left_node, indent + 2)
+                print(f'{spaces}│  └─ Right:')
+                print_ast_structure(node.right_node, indent + 2)
+            elif hasattr(node, 'node'):
+                print(f'{spaces}│  └─ Operand:')
+                print_ast_structure(node.node, indent + 2)
+            elif hasattr(node, 'value_node'):
+                print(f'{spaces}│  └─ Value:')
+                print_ast_structure(node.value_node, indent + 2)
+            elif hasattr(node, 'element_nodes'):
+                print(f'{spaces}│  └─ Elements:')
+                for i, elem in enumerate(node.element_nodes):
+                    print(f'{spaces}     [{i}]:')
+                    print_ast_structure(elem, indent + 3)
+            elif hasattr(node, 'tok'):
+                print(f'{spaces}│  └─ Value: {node.tok.value}')
+        
+        print('\n🌲 AST Structure:')
+        print_ast_structure(ast.node)
+        print()
+
+        # PHASE 3: SEMANTIC ANALYSIS & INTERPRETATION
+        print('⚡ PHASE 3: SEMANTIC ANALYSIS & INTERPRETATION')
+        print('-' * 50)
+        
+        interpreter = Interpreter()
+        context = Context('<program>')
+        context.symbol_table = global_symbol_table
+        result = interpreter.visit(ast.node, context)
+        
+        if result.error:
+            print('❌ RUNTIME ERROR:', result.error.as_string())
+            return None, result.error
+        
+        print('✅ Code executed successfully!')
+        print(f'📤 Result: {result.value}')
+        print(f'📊 Result Type: {type(result.value).__name__}')
+        
+        # Show variables in global scope
+        if hasattr(context.symbol_table, 'symbols') and context.symbol_table.symbols:
+            print('\n📋 Variables in scope:')
+            for name, value in context.symbol_table.symbols.items():
+                if not name.isupper():  # Skip built-in constants
+                    print(f'  {name} = {value} ({type(value).__name__})')
+
+        print('\n' + '=' * 60)
+        print('🎉 INTERPRETATION COMPLETED SUCCESSFULLY')
+        print('=' * 60)
+
+        return result.value, result.error
+
+    except Exception as e:
+        print(f'\n❌ UNEXPECTED ERROR: {str(e)}')
+        print('\n' + '=' * 60)
+        print('💥 INTERPRETATION FAILED')
+        print('=' * 60)
+        return None, RTError(Position(0, 0, 0, fn, text), Position(0, 0, 0, fn, text), str(e), Context('<program>'))
+
+# Test the enhanced interpreter
+if __name__ == "__main__":
+    print('🧪 TESTING ENHANCED INTERPRETER\n')
+    
+    # Test cases
+    test_cases = [
+        '5 + 3 * 2',
+        'VAR x = 10 + 5',
+        '"Hello" + " World"',
+        '[1, 2, 3, 4]',
+        '(10 + 5) * 2 - 3',
+        '2 ^ 3 + 1'
+    ]
+    
+    for i, test_code in enumerate(test_cases, 1):
+        print(f'\n📝 TEST CASE {i}:')
+        result, error = run('<stdin>', test_code)
+        if error:
+            print(f'Error: {error.as_string()}')
+        print('\n' + '🔄' * 30 + '\n')
+        

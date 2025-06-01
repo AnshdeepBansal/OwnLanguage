@@ -1,0 +1,28 @@
+// Missing END in loop
+FOR i = 0 TO 3 THEN
+  PRINT(i)
+// missing END
+
+// Invalid function declaration syntax
+FUNC add(x, y) -> x + y
+
+// Variable name starting with a number
+VAR 2cool = 10
+
+// Missing parentheses in function call
+PRINT "Hello"
+
+// Function call with wrong number of arguments
+FUN sum(x, y) -> x + y
+PRINT(sum(5))
+
+// Unclosed string
+VAR name = "Ansh
+
+// Unknown keyword
+FOOR i = 0 TO 3 THEN
+  PRINT(i)
+END
+
+// Misplaced arrow
+FUN fail -> x + y

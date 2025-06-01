@@ -1,0 +1,23 @@
+// Simple function and print
+FUN greet(name) -> "Hello, " + name
+PRINT(greet("Ansh"))
+
+// Arithmetic operations and variable assignment
+VAR x = 10
+VAR y = 5
+VAR z = x + y * 2
+PRINT(z)
+
+// Loop with condition
+FOR i = 0 TO 3 THEN
+  PRINT(i)
+END
+
+// Function calling another function
+FUN square(x) -> x * x
+FUN double_square(x) -> square(x) * 2
+PRINT(double_square(4))
+
+// Working with lists and map
+FUN add_suffix(word) -> word + "ly"
+PRINT(join(map(["quick", "slow"], add_suffix), ", "))
